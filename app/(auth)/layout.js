@@ -1,6 +1,6 @@
-import ToastContext from "@/components/ToastContext";
+import ToastContext from "../../components/ToastContext";
 import "../globals.css";
-import Provider from "@/components/Provider";
+import Provider from "../../components/Provider";
 
 export const metadata = {
   title: "Create Next App",

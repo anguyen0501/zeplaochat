@@ -50,7 +50,7 @@
 
 /* Top Bar */
 .topbar {
-  @apply top-0 sticky px-10 py-5 flex items-center justify-between bg-blue-2;
+  @apply top-0 sticky px-10 py-5 flex items-center justify-between bg-gray-200;
 }
 
 .menu {
