@@ -2,7 +2,8 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Loader from "./Loader";
-import { RadioButtonUnchecked } from "@mui/icons-material";
+import { CheckCircle, RadioButtonUnchecked } from "@mui/icons-material";
+import { useRouter } from "next/navigation";
 
 const Contacts = () => {
   const [loading, setLoading] = useState(true);
@@ -15,7 +16,11 @@ const Contacts = () => {
 
   const getContacts = async () => {
     try {
-      const res = await fetch(searchQuery !== "" ? `/api/users/searchContact/${searchQuery}` : "/api/users");
+      const res = await fetch(
+        searchQuery !== ""
+          ? `/api/users/searchContact/${searchQuery}`
+          : "/api/users"
+      );
       const data = await res.json();
       setContacts(data.filter((user) => user._id !== currentUser._id));
       setLoading(false);
@@ -29,6 +34,53 @@ const Contacts = () => {
       getContacts();
     }
   }, [currentUser, searchQuery]);
+
+  /* SELECT CONTACTS */
+  const [selectedContacts, setSelectedContacts] = useState([]);
+  const isGroup = selectedContacts.length > 1;
+
+  const handleSelect = (contact) => {
+    if (selectedContacts.includes(contact)) {
+      setSelectedContacts((prevSelectedContacts) =>
+        prevSelectedContacts.filter((item) => item !== contact)
+      );
+    } else {
+      setSelectedContacts((prevSelectedContacts) => [
+        ...prevSelectedContacts,
+        contact,
+      ]);
+    }
+  };
+  /* ADD GROUP CHAT NAME */
+  const [groupChatName, setGroupChatName] = useState("");
+  const router = useRouter();
+  /* CREATE GROUP CHAT */
+  const createChat = async () => {
+    try {
+      const res = await fetch("/api/chats", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          currentUserId: currentUser._id,
+          members: selectedContacts.map((contact) => contact._id),
+          isGroup,
+          name: isGroup ? groupChatName : "",
+        }),
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok && data.chat) {
+        router.push(`/chats/${data.chat._id}`);
+      } else {
+        console.error('Failed to create chat:', data.message);
+      }
+    } catch (error) {
+      console.error('Error creating chat:', error);
+    }
+  };
   return loading ? (
     <Loader />
   ) : (
@@ -43,8 +95,16 @@ const Contacts = () => {
         <div className="contact-list">
           <p className="text-body-bold">Select or Deselect</p>
           {contacts.map((user, index) => (
-            <div key={index} className="contact">
-              <RadioButtonUnchecked />
+            <div
+              key={index}
+              className="contact"
+              onClick={() => handleSelect(user)}
+            >
+              {selectedContacts.find((item) => item === user) ? (
+                <CheckCircle sx={{ color: "#007bff" }} />
+              ) : (
+                <RadioButtonUnchecked />
+              )}
               <img
                 src={user.profileImage || "/assets/person.jpg"}
                 alt="profile"
@@ -55,7 +115,37 @@ const Contacts = () => {
           ))}
         </div>
         <div className="create-chat">
-          <button className="btn">START A NEW CHAT</button>
+          {isGroup && (
+            <>
+              <div className="flex flex-col gap-3">
+                <p className="text-body-bold">Group Chat Name</p>
+                <input
+                  type="text"
+                  placeholder="Group chat name"
+                  className="input-group-name"
+                  value={groupChatName}
+                  onChange={(e) => setGroupChatName(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col gap-3">
+                <p className="text-body-bold">Members</p>
+                <div className="flex flex-wrap gap-3">
+                  {selectedContacts.map((contact, index) => (
+                    <p className="selected-contact" key={index}>
+                      {contact.username}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+          <button
+            className="btn"
+            onClick={createChat}
+            disabled={selectedContacts.length === 0}
+          >
+            START A NEW CHAT
+          </button>
         </div>
       </div>
     </div>
