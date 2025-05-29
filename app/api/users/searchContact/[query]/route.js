@@ -4,8 +4,8 @@ import { connectToDB } from "@/mongodb";
 export const GET = async (req, { params }) => {
     try {
         await connectToDB();
-
-        const searchQuery = params.query;
+        
+        const { query: searchQuery } = await params;
 
         const searchContacts = await User.find({
             $or: [

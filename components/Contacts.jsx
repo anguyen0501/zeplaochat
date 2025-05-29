@@ -94,6 +94,7 @@ const Contacts = () => {
       <div className="contact-bar">
         <div className="contact-list">
           <p className="text-body-bold">Select or Deselect</p>
+          <div className="flex flex-col flex-1 gap-5 overflow-y-scroll custom-scrollbar">
           {contacts.map((user, index) => (
             <div
               key={index}
@@ -113,6 +114,7 @@ const Contacts = () => {
               <p className="text-base-bold">{user.username}</p>
             </div>
           ))}
+          </div>
         </div>
         <div className="create-chat">
           {isGroup && (
@@ -144,7 +146,7 @@ const Contacts = () => {
             onClick={createChat}
             disabled={selectedContacts.length === 0}
           >
-            START A NEW CHAT
+            FIND OR START A NEW CHAT
           </button>
         </div>
       </div>
