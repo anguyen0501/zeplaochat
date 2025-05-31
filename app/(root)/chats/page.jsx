@@ -1,4 +1,4 @@
-"use client"
+
 import ChatList from "@/components/ChatList";
 import Contacts from "@/components/Contacts";
 import React from "react";
