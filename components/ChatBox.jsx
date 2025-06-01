@@ -9,10 +9,17 @@ const ChatBox = ({ chat, currentUser, currentChatId }) => {
   const lastMessage =
     chat?.messages?.length > 0 && chat?.messages[chat?.messages?.length - 1];
 
+  const seen = lastMessage?.seenBy?.find(
+    (member) => member._id === currentUser._id
+  );
+
   const router = useRouter();
 
   return (
-    <div className={`chat-box ${currentChatId === chat?._id ? "bg-blue-2" : ""}`} onClick={() => router.push(`/chats/${chat?._id}`)}>
+    <div
+      className={`chat-box ${currentChatId === chat?._id ? "bg-blue-2" : ""}`}
+      onClick={() => router.push(`/chats/${chat?._id}`)}
+    >
       <div className="chat-info">
         {chat?.isGroup ? (
           <img
@@ -34,6 +41,28 @@ const ChatBox = ({ chat, currentUser, currentChatId }) => {
             <p className="text-base-bold">{otherMembers[0]?.username}</p>
           )}
           {!lastMessage && <p className="text-small-bold">Started a chat</p>}
+
+          {lastMessage?.photo ? (
+            lastMessage?.sender?._id === currentUser?._id ? (
+              <p className="text-small-medium text-grey-3">You sent a photo</p>
+            ) : (
+              <p
+                className={`text-small-medium ${
+                  seen ? " text-small-medium text-grey-3" : "text-small-bold"
+                }`}
+              >
+                Recieved a photo
+              </p>
+            )
+          ) : (
+            <p
+              className={`last-message ${
+                seen ? "text-small-medium text-grey-3" : "text-small-bold"
+              }`}
+            >
+              {lastMessage?.text || "Started a chat"}
+            </p>
+          )}
         </div>
       </div>
       <div>

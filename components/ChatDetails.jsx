@@ -5,6 +5,8 @@ import Loader from "./Loader";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { AddPhotoAlternate } from "@mui/icons-material";
+import { CldUploadButton } from "next-cloudinary";
+import MessageBox from "./MessageBox";
 
 const ChatDetails = ({ chatId }) => {
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,45 @@ const ChatDetails = ({ chatId }) => {
     }
   }, [currentUser, chatId]);
 
-  
+  const sendText = async () => {
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chatId,
+          currentUserId: currentUser._id,
+          text,
+        }),
+      });
+      if (res.ok) {
+        setText("");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const sendPhoto = async (result) => {
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chatId,
+          currentUserId: currentUser._id,
+          photo: result?.info?.secure_url,
+        }),
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return loading ? (
     <Loader />
   ) : (
@@ -46,57 +86,67 @@ const ChatDetails = ({ chatId }) => {
       <div className="chat-details">
         <div className="chat-header">
           {chat?.isGroup ? (
-          <>
-            <Link href={`/chats/${chatId}/group-info`}>
+            <>
+              <Link href={`/chats/${chatId}/group-info`}>
+                <img
+                  src={chat?.groupPhoto || "/assets/group.png"}
+                  alt="group-photo"
+                  className="profilePhoto"
+                />
+                <div className="text">
+                  <p>
+                    {chat?.name} &#160; &#183; &#160; {chat?.members?.length}{" "}
+                    members
+                  </p>
+                </div>
+              </Link>
+            </>
+          ) : (
+            <>
               <img
-                src={chat?.groupPhoto || "/assets/group.png"}
-                alt="group-photo"
+                src={otherMembers[0].profileImage || "/assets/person.jpg"}
+                alt="profile photo"
                 className="profilePhoto"
               />
               <div className="text">
-                <p>
-                  {chat?.name} &#160; &#183; &#160; {chat?.members?.length}{" "}
-                  members
-                </p>
+                <p>{otherMembers[0].username}</p>
               </div>
-            </Link>
-          </>
-        ) : (
-          <>
-            <img
-              src={otherMembers[0].profileImage || "/assets/person.jpg"}
-              alt="profile photo"
-              className="profilePhoto"
+            </>
+          )}
+        </div>
+        <div className="chat-body">
+          {chat?.messages?.map((message, index) => (
+            <MessageBox key={index} message={message} currentUser={currentUser} />
+          ))}
+        </div>
+        <div className="send-message">
+          <div className="prepare-message">
+            <CldUploadButton
+              options={{ maxFiles: 1 }}
+              onSuccess={sendPhoto}
+              uploadPreset="aysr3fne"
+            >
+              <AddPhotoAlternate
+                sx={{
+                  fontSize: "35px",
+                  color: "#737373",
+                  cursor: "pointer",
+                  "&:hover": { color: "red" },
+                }}
+              />
+            </CldUploadButton>
+            <input
+              type="text"
+              placeholder="Message..."
+              className="input-field"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              required
             />
-            <div className="text">
-              <p>{otherMembers[0].username}</p>
-            </div>
-          </>
-        )}
-      </div>
-      <div className="chat-body"></div>
-      <div className="send-message">
-        <div className="prepare-message">
-          <AddPhotoAlternate
-            sx={{
-              fontSize: "35px",
-              color: "#737373",
-              cursor: "pointer",
-              "&:hover": { color: "red" },
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Message..."
-            className="input-field"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <img src="/assets/send.jpg" alt="send" className="send-icon" />
-        </div>
+          </div>
+          <div onClick={sendText}>
+            <img src="/assets/send.jpg" alt="send" className="send-icon" />
+          </div>
         </div>
       </div>
     </div>
