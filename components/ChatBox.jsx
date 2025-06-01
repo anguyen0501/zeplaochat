@@ -60,7 +60,7 @@ const ChatBox = ({ chat, currentUser, currentChatId }) => {
                 seen ? "text-small-medium text-grey-3" : "text-small-bold"
               }`}
             >
-              {lastMessage?.text || "Started a chat"}
+              {lastMessage?.text}
             </p>
           )}
         </div>
