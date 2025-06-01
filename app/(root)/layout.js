@@ -2,6 +2,7 @@
 import Provider from "@/components/Provider";
 import "../globals.css";
 import TopBar from "@/components/TopBar";
+import BottomBar from "@/components/BottomBar";
 
 
 export const metadata = {
@@ -16,6 +17,7 @@ export default function RootLayout({ children }) {
         <Provider>
           <TopBar />
           {children}
+          <BottomBar />
         </Provider>
       </body>
     </html>
